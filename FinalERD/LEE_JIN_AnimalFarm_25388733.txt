@@ -1,0 +1,338 @@
+-- AnimalFarm Database
+-- 29. 04. 2024
+-- student name : Jin Lee
+-- student number : 25388733
+-- Email : jeongjin.lee@student.uts.edu.au
+
+-- This database manages various aspects of a farm, including inventory,
+-- animal health records, sales records, employee tasks, and equipment management.
+-- It helps organize and track data related to farm operations,
+-- facilitating efficient management and decision-making processes.
+
+DROP view AnimalFeedingRecords CASCADE;
+DROP view EquipmentUsage CASCADE;
+
+DROP table Employees CASCADE;
+DROP table ActivityLog CASCADE;
+DROP table Inventory CASCADE;
+DROP table Animals CASCADE;
+DROP table Equipment CASCADE;
+DROP table HealthRecords CASCADE;
+DROP table Treatments CASCADE;
+DROP table Feedings CASCADE;
+DROP table SalesRecords CASCADE;
+DROP table Vaccinations CASCADE;
+DROP table Tasks CASCADE;
+DROP table EmployeeTasks CASCADE;
+
+
+
+-- Tables creation
+CREATE TABLE Employees (
+        EmployeeID VARCHAR(255) PRIMARY KEY,
+        Name VARCHAR(255),
+        Role VARCHAR(255),
+        ContactInfo VARCHAR(255),
+        HireDate DATE
+    );
+
+CREATE TABLE Inventory (
+        ItemID VARCHAR(255) PRIMARY KEY,
+        Item VARCHAR(255),
+        Quantity INT,
+        Category VARCHAR(255),
+        SuitableAnimalType VARCHAR(255),
+        BorrowerEmployeeID VARCHAR(255),
+        FOREIGN KEY (BorrowerEmployeeID) REFERENCES Employees(EmployeeID)
+    );
+
+CREATE TABLE ActivityLog (
+        LogID VARCHAR(255) PRIMARY KEY,
+        Date DATE,
+        ActivityType VARCHAR(255),
+        Description TEXT,
+        ResponsibleEmployeeID VARCHAR(255),
+        FOREIGN KEY (ResponsibleEmployeeID) REFERENCES Employees(EmployeeID)
+    );
+
+CREATE TABLE Tasks (
+        TaskID VARCHAR(255) PRIMARY KEY,
+        TaskName VARCHAR(255),
+        TaskType VARCHAR(255),
+        TaskDescription TEXT
+    );
+
+CREATE TABLE EmployeeTasks (
+        TaskID VARCHAR(255),
+        EmployeeID VARCHAR(255),
+        AssignmentDetails TEXT,
+        PRIMARY KEY (TaskID, EmployeeID),
+        FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID),
+        FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+    );
+
+CREATE TABLE Equipment (
+        EquipmentID VARCHAR(255) PRIMARY KEY,
+        Name VARCHAR(255),
+        Type VARCHAR(255),
+        Status VARCHAR(255),
+        ResponsibleEmployeeID VARCHAR(255),
+        FOREIGN KEY (ResponsibleEmployeeID) REFERENCES Employees(EmployeeID)
+    );
+
+CREATE TABLE Animals (
+        AnimalID VARCHAR(255) PRIMARY KEY,
+        Birthdate DATE,
+        HandlerID VARCHAR(255),
+        Type VARCHAR(255),
+        Gender VARCHAR(255),
+        Status VARCHAR(255),
+        DeathDate DATE,
+        DeathCause VARCHAR(255),
+        MotherAnimalID VARCHAR(255),
+        FatherAnimalID VARCHAR(255),
+        FOREIGN KEY (HandlerID) REFERENCES Employees(EmployeeID),
+        FOREIGN KEY (MotherAnimalID) REFERENCES Animals(AnimalID),
+        FOREIGN KEY (FatherAnimalID) REFERENCES Animals(AnimalID)
+    );
+
+
+CREATE TABLE HealthRecords (
+        RecordID VARCHAR(255) PRIMARY KEY,
+        AnimalID VARCHAR(255),
+        Diagnosis VARCHAR(255),
+        TreatmentStartDate DATE,
+        TreatmentEndDate DATE,
+        FOREIGN KEY (AnimalID) REFERENCES Animals(AnimalID)
+    );
+
+CREATE TABLE Treatments (
+        TreatmentID VARCHAR(255) PRIMARY KEY,
+        RecordID VARCHAR(255),
+        TreatmentType VARCHAR(255),
+        TreatmentDate DATE,
+        Outcome VARCHAR(255),
+        AdministeredBy VARCHAR(255),
+        FOREIGN KEY (RecordID) REFERENCES HealthRecords(RecordID),
+        FOREIGN KEY (AdministeredBy) REFERENCES Employees(EmployeeID)
+    );
+
+CREATE TABLE Feedings (
+        FeedingID VARCHAR(255) PRIMARY KEY,
+        AnimalID VARCHAR(255),
+        ItemID VARCHAR(255),
+        FeedingDate DATE,
+        Quantity INT,
+        FOREIGN KEY (AnimalID) REFERENCES Animals(AnimalID),
+        FOREIGN KEY (ItemID) REFERENCES Inventory(ItemID)
+    );
+CREATE TABLE Vaccinations (
+        VaccinationID VARCHAR(255) PRIMARY KEY,
+        AnimalID VARCHAR(255),
+        VaccineName VARCHAR(255),
+        VaccinationDate DATE,
+        FOREIGN KEY (AnimalID) REFERENCES Animals(AnimalID)
+    );
+CREATE TABLE SalesRecords (
+        SaleID VARCHAR(255) PRIMARY KEY,
+        AnimalID VARCHAR(255),
+        SaleDate DATE,
+        Price DECIMAL(10, 2),
+        FOREIGN KEY (AnimalID) REFERENCES Animals(AnimalID)
+    );
+
+
+-- Insert data into Employees
+INSERT INTO Employees (EmployeeID, Name, Role, ContactInfo, HireDate) VALUES 
+('EMP1006', 'Michael Smith', 'Farm Manager', 'michael.smith@farm.com', '2020-03-15'),
+('EMP1007', 'Lisa Johnson', 'Field Worker', 'lisa.johnson@farm.com', '2021-05-21'),
+('EMP1008', 'David Wilson', 'Livestock Supervisor', 'david.wilson@farm.com', '2020-07-30'),
+('EMP1009', 'Susan Brown', 'Veterinary Assistant', 'susan.brown@farm.com', '2022-09-13'),
+('EMP1010', 'James Johnson', 'Agronomist', 'james.johnson@farm.com', '2023-02-05'),
+('EMP1011', 'Patricia Williams', 'Harvest Manager', 'patricia.williams@farm.com', '2021-11-19'),
+('EMP1012', 'Robert Jones', 'Irrigation Specialist', 'robert.jones@farm.com', '2020-12-12'),
+('EMP1013', 'Linda Garcia', 'Tractor Driver', 'linda.garcia@farm.com', '2024-04-23'),
+('EMP0000', 'Jin Lee', 'CEO', 'jinlee@gmail.com', '2020-01-01'),
+('EMP1001', 'Alice Johnson', 'Veterinarian', 'alice.johnson@farm.com', '2020-02-15'),
+('EMP1002', 'Bob Smith', 'Animal Handler', 'bob.smith@farm.com', '2021-06-20'),
+('EMP1003', 'Carol White', 'Farm Supervisor', 'carol.white@farm.com', '2020-08-30'),
+('EMP1004', 'Dave Brown', 'Maintenance Staff', 'dave.brown@farm.com', '2022-01-10'),
+('EMP1005', 'Eve Davis', 'Field Worker', 'eve.davis@farm.com', '2023-05-01');
+
+-- Insert data into Inventory
+INSERT INTO Inventory (ItemID, Item, Quantity, Category, SuitableAnimalType) VALUES 
+('FD101', 'Cow Feed', 500, 'Feed', 'Cow'),
+('FD102', 'Pig Medicine', 200, 'Medicine', 'Pig'),
+('FD103', 'Sheep Feed', 300, 'Feed', 'Sheep'),
+('FD104', 'Chicken Vaccines', 150, 'Medicine', 'Chicken'),
+('FD105', 'Tractor Oil', 20, 'Equipment', NULL),
+('FD106', 'Cow Antibiotics', 350, 'Medicine', 'Cow'),
+('FD107', 'Pig Feed', 600, 'Feed', 'Pig'),
+('FD108', 'General Fertilizer', 1000, 'Equipment', NULL),
+('FD109', 'Chicken Feed', 400, 'Feed', 'Chicken'),
+('FD110', 'Milking Supplies', 50, 'Equipment', 'Cow');
+
+-- Insert data into Tasks
+INSERT INTO Tasks (TaskID, TaskName, TaskType, TaskDescription) VALUES 
+('TSK01', 'Feed Animals', 'Feeding', 'Provide appropriate feed to all farm animals.'),
+('TSK02', 'Clean Stables', 'Cleaning', 'Clean all animal stables and ensure a hygienic environment.'),
+('TSK03', 'Milk Cows', 'Milking', 'Carry out the milking process for dairy cows.'),
+('TSK04', 'Collect Eggs', 'Harvesting', 'Collect eggs from the chicken coops.'),
+('TSK05', 'Repair Fences', 'Maintenance', 'Inspect and repair any damaged sections of farm fencing.'),
+('TSK06', 'Tractor Maintenance', 'Maintenance', 'Perform routine maintenance checks on farm tractors and equipment.'),
+('TSK07', 'Animal Health Check', 'Healthcare', 'Conduct regular health checks on all farm animals.'),
+('TSK08', 'Harvest Crops', 'Harvesting', 'Harvest crops according to the seasonal schedule.'),
+('TSK09', 'Update Inventory', 'Inventory Management', 'Ensure the farm inventory is updated and restocked as necessary.'),
+('TSK10', 'Train New Employees', 'Training', 'Provide onboarding and training for new farm employees.');
+
+-- Insert data into Animals
+INSERT INTO Animals (AnimalID, Birthdate, HandlerID, Type, Gender, MotherAnimalID, FatherAnimalID) VALUES 
+('ANM1001', '2018-05-10', 'EMP1006', 'Cow', 'Male', NULL, NULL),
+('ANM1002', '2017-06-22', 'EMP1007', 'Cow', 'Female', NULL, NULL),
+('ANM1003', '2019-07-15', 'EMP1008', 'Cow', 'Female', 'ANM1002', 'ANM1001'),
+('ANM1004', '2020-08-05', 'EMP1008', 'Cow', 'Male', 'ANM1002', 'ANM1001'),
+('ANM1005', '2021-09-20', 'EMP1007', 'Cow', 'Female', 'ANM1002', 'ANM1001'),
+('ANM1006', '2018-03-11', 'EMP1006', 'Pig', 'Female', NULL, NULL),
+('ANM1007', '2017-04-18', 'EMP1011', 'Pig', 'Male', NULL, NULL),
+('ANM1012', '2017-02-17', 'EMP1002', 'Chicken', 'Male', NULL, NULL),
+('ANM1011', '2018-01-25', 'EMP1001', 'Chicken', 'Female', NULL, NULL),
+('ANM1010', '2021-12-15', 'EMP1005', 'Pig', 'Male', 'ANM1006', 'ANM1007'),
+('ANM1009', '2020-11-30', 'EMP1004', 'Pig', 'Female', 'ANM1006', 'ANM1007'),
+('ANM1008', '2019-10-22', 'EMP1003', 'Pig', 'Male', 'ANM1006', 'ANM1007'),
+('ANM1013', '2019-03-19', 'EMP1003', 'Chicken', 'Male', 'ANM1011', 'ANM1012'),
+('ANM1014', '2020-04-21', 'EMP1004', 'Chicken', 'Female', 'ANM1011', 'ANM1012'),
+('ANM1015', '2021-05-23', 'EMP1005', 'Chicken', 'Female', 'ANM1011', 'ANM1012');
+
+INSERT INTO Animals (AnimalID, Birthdate, HandlerID, Type, Gender, MotherAnimalID, FatherAnimalID, DeathDate, DeathCause) VALUES 
+('ANM1016', '2019-06-01', 'EMP1001', 'Cow', 'Male', 'ANM1002', 'ANM1001', '2021-12-25', 'Natural Causes'),
+('ANM1017', '2018-07-15', 'EMP1002', 'Pig', 'Female', 'ANM1006', 'ANM1007', '2022-05-05', 'Illness'),
+('ANM1018', '2020-08-20', 'EMP1003', 'Chicken', 'Female', 'ANM1011', 'ANM1012', '2022-11-10', 'Predator Attack'),
+('ANM1019', '2019-09-30', 'EMP1004', 'Cow', 'Female', 'ANM1002', 'ANM1001', '2023-01-20', 'Accident'),
+('ANM1020', '2020-10-12', 'EMP1005', 'Pig', 'Male', 'ANM1006', 'ANM1007', '2024-02-15', 'Disease');
+
+-- Insert data into Equipment
+INSERT INTO Equipment (EquipmentID, Name, Type, Status, ResponsibleEmployeeID) VALUES 
+('EQP7001', 'Tractor', 'Vehicle', 'Operational', 'EMP1001'),
+('EQP7002', 'Plow', 'Tool', 'Operational', 'EMP1002'),
+('EQP7003', 'Harvester', 'Vehicle', 'Maintenance Required', 'EMP1003'),
+('EQP7004', 'Seeder', 'Tool', 'Operational', 'EMP1004'),
+('EQP7005', 'Watering System', 'Tool', 'Under Repair', 'EMP1005'),
+('EQP7006', 'Fertilizer Spreader', 'Tool', 'Operational', 'EMP1001'),
+('EQP7007', 'Hay Baler', 'Tool', 'Operational', 'EMP1002'),
+('EQP7008', 'Milking Machine', 'Tool', 'Operational', 'EMP1003'),
+('EQP7009', 'Feeding Trough', 'Tool', 'Operational', 'EMP1004'),
+('EQP7010', 'Electric Fence', 'Tool', 'Under Maintenance', 'EMP1005');
+
+-- Insert data into HealthRecords
+INSERT INTO HealthRecords (RecordID, AnimalID, Diagnosis, TreatmentStartDate, TreatmentEndDate) VALUES 
+('HR4001', 'ANM1001', 'Good Health', NULL, NULL),
+('HR4002', 'ANM1002', 'Good Health', NULL, NULL),
+('HR4003', 'ANM1003', 'Fever', '2022-11-05', '2022-11-10'),
+('HR4004', 'ANM1004', 'Injury', '2023-10-21', '2023-11-05'),
+('HR4005', 'ANM1005', 'Good Health', NULL, NULL),
+('HR4006', 'ANM1006', 'Good Health', NULL, NULL),
+('HR4007', 'ANM1007', 'Pneumonia', '2023-07-10', '2023-07-25'),
+('HR4008', 'ANM1008', 'Good Health', NULL, NULL),
+('HR4009', 'ANM1009', 'Diarrhea', '2023-05-18', '2023-05-25'),
+('HR4010', 'ANM1010', 'Good Health', NULL, NULL);
+
+-- Insert data into Vaccinations
+INSERT INTO Vaccinations (VaccinationID, AnimalID, VaccineName, VaccinationDate) VALUES
+('VAC2001', 'ANM1001', 'General Bovine Vaccine', '2023-08-21'),
+('VAC2002', 'ANM1002', 'General Porcine Vaccine', '2022-07-31'),
+('VAC2003', 'ANM1003', 'General Bovine Vaccine', '2022-02-17'),
+('VAC2004', 'ANM1004', 'General Porcine Vaccine', '2023-02-23'),
+('VAC2005', 'ANM1005', 'General Bovine Vaccine', '2022-02-14'),
+('VAC2006', 'ANM1006', 'General Bovine Vaccine', '2024-04-05'),
+('VAC2007', 'ANM1007', 'General Porcine Vaccine', '2023-12-10'),
+('VAC2008', 'ANM1008', 'General Bovine Vaccine', '2023-09-28'),
+('VAC2009', 'ANM1009', 'General Porcine Vaccine', '2023-05-05'),
+('VAC2010', 'ANM1010', 'General Bovine Vaccine', '2024-01-15');
+
+-- Insert data into SalesRecords
+INSERT INTO SalesRecords (SaleID, AnimalID, SaleDate, Price) VALUES 
+('SR001', 'ANM1001', '2024-04-01', 1200.00),
+('SR002', 'ANM1002', '2024-04-15', 900.00),
+('SR003', 'ANM1003', '2024-04-20', 1500.00);
+
+-- Insert data into Treatments
+INSERT INTO Treatments (TreatmentID, RecordID, TreatmentType, TreatmentDate, Outcome, AdministeredBy) VALUES 
+('TRT2001', 'HR4001', 'Medication', '2022-11-05', 'Recovered', 'EMP1001'),
+('TRT2002', 'HR4002', 'Wound Care', '2023-10-21', 'Recovered', 'EMP1001'),
+('TRT2003', 'HR4003', 'Antibiotics', '2023-07-10', 'Ongoing', 'EMP1001'),
+('TRT2004', 'HR4004', 'Rehydration', '2023-05-18', 'Recovered', 'EMP1001'),
+('TRT2005', 'HR4005', 'Vaccination', '2023-08-28', 'Completed', 'EMP1001'),
+('TRT2006', 'HR4006', 'Surgery', '2023-04-15', 'Ongoing', 'EMP1001'),
+('TRT2007', 'HR4007', 'Physical Therapy', '2024-02-10', 'Ongoing', 'EMP1001'),
+('TRT2008', 'HR4008', 'Medication', '2022-09-05', 'Recovered', 'EMP1001'),
+('TRT2009', 'HR4009', 'Wound Care', '2023-11-30', 'Ongoing', 'EMP1001'),
+('TRT2010', 'HR4010', 'Vaccination', '2024-01-20', 'Completed', 'EMP1001');
+
+-- Insert data into EmployeeTasks
+INSERT INTO EmployeeTasks (TaskID, EmployeeID, AssignmentDetails) VALUES 
+('TSK01', 'EMP1001', 'Daily feeding of all cows.'),
+('TSK03', 'EMP1002', 'Carry out het milking process.'),
+('TSK05', 'EMP1007', 'Inspect and repair any demage.'),
+('TSK10','EMP1001', 'Provide onboarding and training for new farm employees.'),
+('TSK09', 'EMP1001', 'Ensure the farm inventory is updated and restocked as necessary.'),
+('TSK08', 'EMP1002', 'Harvest crops according to the seasonal schedule.'),
+('TSK07', 'EMP1002', 'Conduct regular health checks on all farm animals.'),
+('TSK06','EMP1002', 'Perform routine maintenance checks on farm tractors and equipment.'),
+('TSK05', 'EMP1002', 'Inspect and repair any damaged sections of farm fencing.');
+
+-- Insert data into ActivityLog
+INSERT INTO ActivityLog (LogID, Date, ActivityType, Description, ResponsibleEmployeeID) VALUES
+('001', '2024-04-20', 'Feeding', 'Chicken feeding completed', 'EMP1006'),
+('002', '2024-04-20', 'Cleaning', 'Barn cleaning and disinfection', 'EMP1007'),
+('003', '2024-04-21', 'HealthCheck', 'Routine health check for cattle', 'EMP1001'),
+('004', '2024-04-21', 'Repair', 'Fixed broken fence in the north field', 'EMP1005'),
+('005', '2024-04-22', 'Inventory', 'Updated inventory for feed and supplies', 'EMP1006'),
+('006', '2024-04-22', 'Training', 'Conducted new employee orientation', 'EMP1006'),
+('007', '2024-04-23', 'Treatment', 'Administered vaccines to the sheep flock', 'EMP1010'),
+('008', '2024-04-23', 'Equipment', 'Performed maintenance on the tractor', 'EMP1005'),
+('009', '2024-04-24', 'Inspection', 'Weekly safety inspection completed', 'EMP1006'),
+('010', '2024-04-24', 'Harvesting', 'Assisted with vegetable harvest', 'EMP1008');
+
+-- Insert data into Feedings
+INSERT INTO Feedings (FeedingID, AnimalID, ItemID, FeedingDate, Quantity) VALUES 
+('F011', 'ANM1001', 'FD101', '2024-04-20', 10),
+('F012', 'ANM1002', 'FD101', '2024-04-21', 12),
+('F013', 'ANM1006', 'FD107', '2024-04-20', 8),
+('F014', 'ANM1007', 'FD107', '2024-04-21', 7),
+('F015', 'ANM1012', 'FD109', '2024-04-22', 15),
+('F016', 'ANM1011', 'FD109', '2024-04-23', 15),
+('F017', 'ANM1010', 'FD107', '2024-04-20', 9),
+('F018', 'ANM1009', 'FD107', '2024-04-21', 6),
+('F019', 'ANM1008', 'FD107', '2024-04-22', 11),
+('F020', 'ANM1014', 'FD109', '2024-04-23', 14);
+
+
+-- create view
+
+CREATE VIEW AnimalFeedingRecords AS 
+SELECT 
+    A.AnimalID, 
+    A.Type AS AnimalType, 
+    F.FeedingDate, 
+    I.Item AS FedItem, 
+    F.Quantity 
+FROM 
+    Animals A, Feedings F, Inventory I 
+WHERE 
+    A.AnimalID = F.AnimalID AND 
+    F.ItemID = I.ItemID;
+
+
+CREATE VIEW EquipmentUsage AS 
+SELECT 
+    E.EquipmentID, 
+    E.Name AS EquipmentName, 
+    E.Type AS EquipmentType, 
+    E.Status AS EquipmentStatus, 
+    E.ResponsibleEmployeeID 
+FROM 
+    Equipment E;
+
+
+
+
